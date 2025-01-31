@@ -11,10 +11,21 @@ const getBooks = () => {
   })
 }
 
+const getByISBN = (isbn) => {
+  return new Promise((resolve, reject) => {
+    let isbnNumber = parseInt(isbn);
+    if(books[isbnNumber]){
+      resolve(books[isbnNumber]);
+    } else{
+      reject({status: 404, message: `ISBN ${isbn} not found` });
+    }
+  })
+}
+
 public_users.post("/register", (req,res) => {
   //Write your code here
-  const username = req.params.username;
-  const password = req.params.password;
+  const username = req.body;
+  const password = req.body;
 
   if(username && password){
     if(!isValid(username)){
@@ -50,11 +61,11 @@ public_users.get('/isbn/:isbn',function (req, res) {
     error => res.status(error.status).json({ message: error.message })
   );
   /*
-  const ISBN = req.params.isbn;
-  if(books[ISBN]){
+  const isbn = req.params.isbn;
+  if(books[isbn]){
     return res.json({
       message: "Book Found",
-      book: books[ISBN]
+      book: books[isbn]
     });
   } else{
     return res.status(404).json({ message: "Book not found "});
@@ -69,7 +80,7 @@ public_users.get('/author/:author',function (req, res) {
   getBooks()
   .then((bookEntries) => Object.values(bookEntries))
   .then((books) => books.filter((book) => book.author === author))
-  .then((filteredBooks) => res.send(filteresBooks));
+  .then((filteredBooks) => res.send(filteredBooks));
   /*
   let bookbyAuthor = Object.values(books).filter(book => book.author === author);
   if(bookbyAuthor.length > 0){
@@ -108,8 +119,11 @@ public_users.get('/title/:title',function (req, res) {
 public_users.get('/review/:isbn',function (req, res) {
   //Write your code here
   const ISBN = req.params.isbn;
-  getBooks()
-  .then()
+  getByISBN(req.params.isbn)
+  .then(
+    result => res.send(result),
+    error => res.status(error.status).json({ message: error.message })
+  )
   if(books[ISBN]){
     return res.json({
       message: "Book Found",
